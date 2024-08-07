@@ -9,7 +9,7 @@
     >
       <a href="#">Home 🏠</a>
       <a href="#my-works">My Works 🖥️</a>
-      <a href="#">Hire me 🔈</a>
+      <a href="#hire-us">Hire Us 🔈</a>
     </nav>
   </footer>
 </template>

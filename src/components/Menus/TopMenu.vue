@@ -11,9 +11,9 @@
       >
         <a href="#">Home</a>
         <a href="#my-works">My Work</a>
-        <a href="#"
+        <a href="#hire-us"
            class="border rounded-xl bg-purple-950 text-white
-           ">Hire me</a>
+           ">Hire Us</a>
       </nav>
     </div>
   </section>
