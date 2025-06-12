@@ -108,8 +108,7 @@
         >
           {{ buttonText }}
         </button>
-        <button 
-          v-if="isEditMode"
+        <button      
           type="button"
           class="cancel-btn"
           @click="cancelEdit"
@@ -369,24 +368,14 @@ const handleSubmit = async () => {
 
 <style scoped>
 .admin-form {
-  position: relative;
-  top: 10rem;
   max-width: 800px;
-  margin: 0 auto;
+  margin: 12rem auto 0rem;
   padding: 2rem;
-  background: #fff;
+  background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 768px) {
-  .admin-form {
-    top: 9rem; /* Reduced top margin to match compact header */
-    padding: 1rem; /* Standard padding */
-    margin: 0 0.75rem; /* Slightly reduced side margins */
-    border-radius: 8px;
-  }
-}
 
 h1 {
   font-size: clamp(1.5rem, 5vw, 1.8rem);
@@ -465,7 +454,10 @@ textarea {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  padding: 1rem;
 }
+
+
 
 .submit-btn {
   padding: clamp(0.8rem, 3vw, 1rem);
@@ -476,8 +468,13 @@ textarea {
   font-size: clamp(1rem, 2.5vw, 1.125rem);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: 
+    background-color 0.15s ease-in-out,
+    transform 0.1s ease-out,
+    box-shadow 0.15s ease-in-out;
   margin-top: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
 }
 
 @media (max-width: 768px) {
@@ -488,9 +485,14 @@ textarea {
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #6b4fa8;
+  background-color: #5b21b6;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .submit-btn:focus-visible {
@@ -514,7 +516,7 @@ textarea {
   border: none;
   border-radius: 6px;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease;
 }
 
 .cancel-btn:hover {
@@ -627,16 +629,6 @@ textarea {
   background: none;
 }
 
-@media (max-width: 640px) {
-  .admin-form {
-    margin: 1rem;
-    padding: 1rem;
-  }
-
-  h1 {
-    font-size: 1.5rem;
-  }
-}
 
 @media (max-width: 768px) {
   .markdown-editor {
