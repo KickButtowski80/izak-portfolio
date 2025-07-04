@@ -1,132 +1,113 @@
 <template>
-  <section class="admin-form relative">
-    <!-- Loading Overlay Component with custom screen reader text -->
-    <LoadingOverlay 
-      :isLoading="isLoading" 
-      :fullPage="false" 
-      :message="'Loading post data...'" 
-      :subMessage="'Please wait while we retrieve your content'">
-      <template #sr-text>
-        Post editor is currently loading data from the database. 
-        This may take a few seconds depending on your connection speed.
-      </template>
-    </LoadingOverlay>
-    
-    <h1 id="form-heading">{{ isEditMode ? 'Edit Blog Post' : 'New Blog Post' }}</h1>    
-    <form 
-      @submit.prevent="handleSubmit" 
-      aria-labelledby="form-heading"
-      :class="{ 'opacity-50': isLoading }"
-      :aria-busy="isLoading"
-    >
-      <div class="form-group">
-        <label for="title">Title</label>
-        <input 
-          id="title" 
-          v-model="formData.title" 
-          type="text" 
-          placeholder="Enter post title" 
-          required
-          :aria-invalid="formErrors.title ? 'true' : 'false'"
-          autocomplete="off"
-        >
-        <div v-if="formErrors.title" class="error-message" role="alert">{{ formErrors.title }}</div>
-      </div>
+    <section class="admin-form relative">
+        <!-- Loading Overlay Component with custom screen reader text -->
+        <LoadingOverlay :isLoading="isLoading" :fullPage="false" :message="'Loading post data...'"
+            :subMessage="'Please wait while we retrieve your content'">
+            <template #sr-text>
+                Post editor is currently loading data from the database.
+                This may take a few seconds depending on your connection speed.
+            </template>
+        </LoadingOverlay>
 
-      <div class="form-group">
-        <label for="date">Date</label>
-        <input 
-          id="date" 
-          v-model="formData.date" 
-          type="date" 
-          required
-          :aria-invalid="formErrors.date ? 'true' : 'false'"
-        >
-        <div v-if="formErrors.date" class="error-message" role="alert">{{ formErrors.date }}</div>
-      </div>
+        <h1 id="form-heading">{{ isEditMode ? 'Edit Blog Post' : 'New Blog Post' }}</h1>
+        <form @submit.prevent="handleSubmit" aria-labelledby="form-heading" :class="{ 'opacity-50': isLoading }"
+            :aria-busy="isLoading">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input id="title" v-model="formData.title" type="text" placeholder="Enter post title" required
+                    :aria-invalid="formErrors.title ? 'true' : 'false'" autocomplete="off">
+                <div v-if="formErrors.title" class="error-message" role="alert">{{ formErrors.title }}</div>
+            </div>
 
-      <div class="form-group">
-        <label for="readingTime">Reading Time (minutes)</label>
-        <input 
-          id="readingTime" 
-          v-model.number="formData.readingTime" 
-          type="number" 
-          min="1" 
-          required
-          :aria-invalid="formErrors.readingTime ? 'true' : 'false'"
-          aria-describedby="readingTimeHint"
-        >
-        <div id="readingTimeHint" class="hint">Estimated time to read this article in minutes</div>
-        <div v-if="formErrors.readingTime" class="error-message" role="alert">{{ formErrors.readingTime }}</div>
-      </div>
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input id="date" v-model="formData.date" type="date" required
+                    :aria-invalid="formErrors.date ? 'true' : 'false'">
+                <div v-if="formErrors.date" class="error-message" role="alert">{{ formErrors.date }}</div>
+            </div>
 
-      <div class="form-group">
-        <label for="featureImage">Feature Image URL</label>
-        <input 
-          id="featureImage" 
-          v-model="formData.featureImage" 
-          type="url" 
-          placeholder="Enter image URL"
-          :aria-invalid="formErrors.featureImage ? 'true' : 'false'"
-        >
-        <div v-if="formErrors.featureImage" class="error-message" role="alert">{{ formErrors.featureImage }}</div>
-      </div>
+            <div class="form-group">
+                <label for="readingTime">Reading Time (minutes)</label>
+                <input id="readingTime" v-model.number="formData.readingTime" type="number" min="1" required
+                    :aria-invalid="formErrors.readingTime ? 'true' : 'false'" aria-describedby="readingTimeHint">
+                <div id="readingTimeHint" class="hint">Estimated time to read this article in minutes</div>
+                <div v-if="formErrors.readingTime" class="error-message" role="alert">{{ formErrors.readingTime }}</div>
+            </div>
 
-      <div class="form-group">
-        <label for="content">Content (Markdown)</label>
-        <div class="markdown-editor" role="group" aria-labelledby="markdown-editor-label">
-          <span id="markdown-editor-label" class="sr-only">Markdown editor with preview</span>
-          <textarea 
-            id="content" 
-            v-model="formData.content" 
-            placeholder="Write your post content in markdown..."
-            required
-            :aria-invalid="formErrors.content ? 'true' : 'false'"
-            aria-describedby="markdownHint"
-            rows="10"
-          ></textarea>
-          <div id="markdownHint" class="hint">Use markdown syntax for formatting. Preview appears on the right.</div>
-          <div v-if="formErrors.content" class="error-message" role="alert">{{ formErrors.content }}</div>
-          
-          <section class="preview-container" aria-live="polite">
-          <h2 id="preview-heading">Preview</h2>
-          <article 
-            v-html="previewContent" 
-            class="preview-content"
-            tabindex="0"
-          ></article>
-        </section>
-        </div>
-      </div>
+            <div class="form-group">
+                <label for="featureImage">Feature Image URL</label>
+                <input id="featureImage" v-model="formData.featureImage" type="url" placeholder="Enter image URL"
+                    :aria-invalid="formErrors.featureImage ? 'true' : 'false'">
+                <div v-if="formErrors.featureImage" class="error-message" role="alert">{{ formErrors.featureImage }}
+                </div>
+            </div>
 
-      <div class="button-group">
-        <button 
-          type="submit"
-          class="submit-btn"
-          :disabled="isSubmitting"
-          :aria-busy="isSubmitting"
-        >
-          {{ buttonText }}
-        </button>
-        <button 
-          v-if="isEditMode"
-          type="button"
-          class="cancel-btn"
-          @click="cancelEdit"
-          :disabled="isSubmitting"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-    
-    <Notification 
-      v-model="showNotification" 
-      :message="notificationMessage" 
-      :type="notificationType" 
-      :icon="notificationIcon"
-    />
-  </section>
+            <div class="form-group">
+                <label for="content">Content (Markdown)</label>
+                <div class="markdown-editor" role="group" aria-labelledby="markdown-editor-label">
+                    <span id="markdown-editor-label" class="sr-only">Markdown editor with preview</span>
+
+                    <!-- Tab Navigation -->
+                    <div class="markdown-tabs">
+                        <button type="button" @click="activeTab = 'edit'"
+                            :class="['tab-button', { active: activeTab === 'edit' }]" aria-controls="editor-panel"
+                            :aria-selected="activeTab === 'edit'">
+                            <span class="icon">✏️</span> Edit
+                        </button>
+                        <button type="button" @click="activeTab = 'preview'"
+                            :class="['tab-button', { active: activeTab === 'preview' }]" aria-controls="preview-panel"
+                            :aria-selected="activeTab === 'preview'">
+                            <span class="icon">👁️</span> Preview
+                        </button>
+                    </div>
+
+                    <!-- Editor Panel -->
+                    <div id="editor-panel" v-show="activeTab === 'edit'" role="tabpanel" aria-labelledby="edit-tab">
+                        <!-- Markdown Toolbar -->
+
+                        <MarkdownToolbar @format="handleFormat" />
+
+
+                        <textarea ref="contentTextarea" id="content" v-model="formData.content"
+                            @keydown.tab.exact.prevent="handleTabWrapper"
+                            @keydown.shift.tab.exact.prevent="handleShiftTabWrapper"
+                            @keydown.enter.exact.prevent="handleEnter" @keydown.esc="handleEsc"
+                            placeholder="Write your post content in markdown..." required
+                            :aria-invalid="formErrors.content ? 'true' : 'false'" rows="15">
+                </textarea>
+                        <div v-if="formErrors.content" class="error-message" role="alert">{{ formErrors.content }}</div>
+                    </div>
+
+                    <!-- Preview Panel -->
+                    <div id="preview-panel" class="whitespace-pre-wrap tab-size-4" v-show="activeTab === 'preview'"
+                        role="tabpanel" aria-labelledby="preview-tab" aria-live="polite">
+                        <div class="preview-header">
+                            <h2 id="preview-heading" class="text-xl font-semibold mb-2 sr-only">Preview</h2>
+                            <article v-html="previewContent" class="preview-content prose lg:prose-lg max-w-none"
+                                tabindex="0">
+
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="submit-btn" :disabled="isSubmitting" :aria-busy="isSubmitting">
+                    {{ buttonText }}
+                </button>
+                <button type="button" class="cancel-btn" @click="cancelEdit" :disabled="isSubmitting">
+                    Cancel Post
+                </button>
+            </div>
+        </form>
+
+        <Notification v-model="showNotification" :message="notificationMessage" :type="notificationType"
+            :icon="notificationIcon" />
+
+        <ConfirmationDialog ref="confirmDialog" message="Discard all changes and return to posts?"
+            confirm-text="Discard" cancel-text="Keep Editing" @confirm="navigateToManagePosts" />
+    </section>
 </template>
 
 <script setup>
@@ -134,513 +115,1003 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { addPost, updatePost, getPostById, signOut, auth } from '@/config/firebase'
 import LoadingOverlay from '@/components/UI/LoadingOverlay.vue'
-import { marked } from 'marked'
-import hljs from 'highlight.js'
-import 'highlight.js/styles/github.css'
+import { renderMarkdown } from '@/utils/markdown';
 import Notification from '@/components/UI/Notification.vue'
 import { useNotification } from '@/utils/helpers'
-const { 
-  showNotification, 
-  notificationMessage, 
-  notificationType, 
-  notificationIcon, 
-  showNotify 
+import MarkdownToolbar from '../UI/MarkdownToolbar.vue';
+import ConfirmationDialog from '@/components/UI/ConfirmationDialog.vue';
+import { handleTab, handleShiftTab } from '@/utils/textareaHelpers';
+const {
+    showNotification,
+    notificationMessage,
+    notificationType,
+    notificationIcon,
+    showNotify
 } = useNotification();
 const props = defineProps({
-  id: { type: String, default: '' }
+    id: { type: String, default: '' }
 })
 
 const router = useRouter();  // For navigation :performing navigation actions
 const route = useRoute();    // For reading current route info
 const postId = ref(null);
 const isEditMode = ref(false);
-
+const activeTab = ref('edit'); // For tab switching between edit and preview
+const confirmDialog = ref(null);
 const formData = ref({
-  title: '',
-  date: new Date().toISOString().split('T')[0],
-  readingTime: 5,
-  featureImage: '',
-  content: ''
-})
-
-// Form validation state
-const formErrors = ref({
-  title: '',
-  date: '',
-  readingTime: '',
-  featureImage: '',
-  content: ''
-})
-
-const isSubmitting = ref(false)
-const isLoading = ref(false)
-
-// Configure marked for syntax highlighting
-marked.setOptions({
-  gfm: true,
-  breaks: true,
-  highlight: function(code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      return hljs.highlight(lang, code).value
-    }
-    return hljs.highlightAuto(code).value
-  }
-})
-
-const previewContent = computed(() => {
-  return marked.parse(formData.value.content || '')
-})
-
-// Computed property for button text based on form state
-const buttonText = computed(() => {
-  if (isSubmitting.value) {
-    return isEditMode.value ? 'Updating...' : 'Publishing...'
-  }
-  return isEditMode.value ? 'Update Post' : 'Publish Post'
-})
+    title: '',
+    date: new Date().toISOString().split('T')[0],
+    readingTime: 5,
+    featureImage: '',
+    content: ''
+});
 
 // Load post data if in edit mode
-const loadPost = async () => {
-  // Get ID from either props or route params
-  const editId = props.id || route.params.id;
-  if (!editId) return;
-  
-  try {
-    isLoading.value = true;
-    const post = await getPostById(editId);
-    
-    if (post) {
-      postId.value = post.id;
-      isEditMode.value = true;
-      
-      // Format the date from Firestore timestamp to YYYY-MM-DD for the input field
-      formData.value = {
-        ...post,
-        date: post.date instanceof Date ? post.date.toISOString().split('T')[0] : 
-              post.date && post.date.toDate ? post.date.toDate().toISOString().split('T')[0] : 
-              new Date().toISOString().split('T')[0]
-      };
-    } else {
-      showNotify('Post not found', 'error');
-      router.push('/admin');
-    }
-  } catch (error) {
-    console.error('Error loading post:', error);
-    showNotify('Failed to load post', 'error');
-    router.push('/admin');
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// Check token expiration and load post if needed
 onMounted(async () => {
-  if (!auth.currentUser) {
-    router.push('/login');
-    return;
-  }
-  
-  // If we have a post ID (either from props or route params), load the post data
-  if (props.id || route.params.id) {
-    await loadPost();
-  }
-  
-  // Set initial focus to the title field
-  nextTick(() => {
-    document.getElementById('title')?.focus();
-  });
+    const currentPostId = props.id || route.params.id;
+    if (currentPostId) {
+        isEditMode.value = true;
+        postId.value = currentPostId;
+        isLoading.value = true;
+
+        try {
+            const post = await getPostById(currentPostId);
+            if (post) {
+                formData.value = {
+                    title: post.title || '',
+                    date: post.date ? new Date(post.date.seconds * 1000).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    readingTime: post.readingTime || 5,
+                    featureImage: post.featureImage || '',
+                    content: post.content || ''
+                };
+            }
+        } catch (error) {
+            console.error('Error loading post:', error);
+            showNotify('Failed to load post. Please try again.', 'error');
+        } finally {
+            isLoading.value = false;
+        }
+    }
+});
+
+const contentTextarea = ref(null);
+const orderListCounters = ref({});
+
+
+const formErrors = ref({
+    title: '',
+    date: '',
+    readingTime: '',
+    featureImage: '',
+    content: ''
+});
+
+const isSubmitting = ref(false);
+const isLoading = ref(false);
+
+const previewContent = computed(() => {
+    return renderMarkdown(formData.value.content || '');
+});
+
+const buttonText = computed(() => {
+    if (isSubmitting.value) {
+        return isEditMode.value ? 'Updating...' : 'Publishing...';
+    }
+    return isEditMode.value ? 'Update Post' : 'Publish Post';
 });
 
 
+/**
+ * Wrapper for handleTab utility function that passes the reactive formData object
+ * Uses the "pass by reference" pattern where the utility directly modifies formData.content
+ * This maintains reactivity since the object properties are mutated, not replaced
+ * @param {KeyboardEvent} event - The keyboard event object
+ */
+const handleTabWrapper = (event) => {
+    handleTab(event, formData.value);
+};
+
+/**
+ * Wrapper for handleShiftTab utility function that passes the reactive formData object
+ * Uses the "pass by reference" pattern where the utility directly modifies formData.content
+ * Alternative approach would be to return the new text and assign it here:
+ * formData.value.content = handleShiftTab(event, formData.value.content);
+ * @param {KeyboardEvent} event - The keyboard event object
+ */
+const handleShiftTabWrapper = (event) => {
+    handleShiftTab(event, formData.value);
+};
 
 
-// Validate form fields
-const validateForm = () => {
-  let isValid = true
-  
-  // Reset all errors
-  Object.keys(formErrors.value).forEach(key => {
-    formErrors.value[key] = ''
-  })
-  
-  // Title validation
-  if (!formData.value.title.trim()) {
-    formErrors.value.title = 'Please enter a title'
-    isValid = false
-  }
-  
-  // Date validation
-  if (!formData.value.date) {
-    formErrors.value.date = 'Please select a date'
-    isValid = false
-  }
-  
-  // Reading time validation
-  if (!formData.value.readingTime || formData.value.readingTime < 1) {
-    formErrors.value.readingTime = 'Reading time must be at least 1 minute'
-    isValid = false
-  }
-  
-  // Feature image URL validation (if provided)
-  if (formData.value.featureImage && !isValidUrl(formData.value.featureImage)) {
-    formErrors.value.featureImage = 'Please enter a valid URL'
-    isValid = false
-  }
-  
-  // Content validation
-  if (!formData.value.content.trim()) {
-    formErrors.value.content = 'Please enter content for your post'
-    isValid = false
-  }
-  
-  return isValid
-}
+/**
+ * Gets the indentation of the current line
+ * @param {string} text - The text to analyze
+ * @returns {string} - The indentation string (spaces/tabs)
+ */
+const currentLinesIndention = (text) => {
+    const currentLineStart = text.lastIndexOf('\n') + 1;
+    const currentLine = text.substring(currentLineStart);
+    
+    // Handle empty or whitespace-only lines
+    if (!currentLine.trim()) {
+        return '';
+    }
+    
+    // Match leading whitespace (tabs or spaces)
+    const indentMatch = currentLine.match(/^[\t ]*/);
+    return indentMatch ? indentMatch[0] : '';
+};
 
-// Helper to validate URLs
-const isValidUrl = (url) => {
-  try {
-    new URL(url)
-    return true
-  } catch (e) {
-    return false
-  }
-}
+/**
+ * Get the next ordered list counter and indentation string
+ * @param {string} beforeText - The text before the cursor
+ * @returns {Object} - The next counter and indentation information
+ */
+const getOrderListCounter = (beforeText) => {
+    // Get the current line's indentation
+    const indentStr = currentLinesIndention(beforeText);
 
+    // Calculate indentation in tab stops (1 tab = 4 spaces)
+    const currentIndent = indentStr.split('').reduce((total, char) =>
+        total + (char === '\t' ? 4 : 1), 0);
+
+    // Round down to nearest tab stop
+    const tabStop = Math.floor(currentIndent / 4) * 4;
+    const indentLevel = tabStop / 4; // 0 = top level, 1 = 1 tab, etc.
+
+    const parentId = findParentListItem(beforeText, indentLevel);
+
+    // Cleanup logic: Remove counters for stale lists.
+    for (const key in orderListCounters.value) {
+        const keyLevelMatch = key.match(/level_(\d+)/);
+        const keyParentMatch = key.match(/parent_(.+)$/);
+
+        if (keyLevelMatch && keyParentMatch) {
+            const keyLevel = parseInt(keyLevelMatch[1], 10);
+            const keyParentId = keyParentMatch[1];
+
+            // 1. Delete counters for any lists nested deeper than the current level.
+            if (keyLevel > indentLevel) {
+                delete orderListCounters.value[key];
+            }
+
+            // 2. Delete counters for lists at the same level but with a different parent.
+            // This handles starting a new sub-list after finishing a previous one.
+            if (keyLevel === indentLevel && keyParentId !== parentId) {
+                delete orderListCounters.value[key];
+            }
+        }
+    }
+
+    // Create composite key using both level and parent
+    const compositeKey = `level_${indentLevel}_parent_${parentId}`;
+
+    // Initialize or get counter for this specific sub-list
+    if (!orderListCounters.value[compositeKey]) {
+        orderListCounters.value[compositeKey] = 1; // Start at 1
+    } else {
+        orderListCounters.value[compositeKey]++; // Increment the counter
+    }
+
+    return {
+        number: orderListCounters.value[compositeKey],
+        indent: indentStr
+    };
+};
+
+
+/**
+ * Helper function to find the parent list item for hierarchical tracking
+ * @param {string} text - The text before the cursor
+ * @param {number} currentLevel - The current indentation level
+ * @returns {string} - A unique identifier for the parent list item
+ */
+const findParentListItem = (text, currentLevel) => {
+    if (currentLevel === 0) return 'root';
+
+    const lines = text.split('\n');
+    let listBlockStartIndex = lines.length - 1;
+
+    // 1. Find the start of the current contiguous list block
+    // A block starts after a blank line or a line with less indentation.
+    // Start from the second-to-last line to avoid including the current line in the search
+    const startIndex = Math.max(0, lines.length - 2);
+
+    for (let i = startIndex; i >= 0; i--) {
+        const line = lines[i];
+        const lineIndent = (line.match(/^[\t ]*/) || [''])[0];
+        const lineIndentLevel = Math.floor(lineIndent.split('').reduce((total, char) =>
+            total + (char === '\t' ? 4 : 1), 0) / 4);
+
+        // If we find a line with less indentation or a blank line, we've found our block start
+        if (lineIndentLevel < currentLevel || !line.trim()) {
+            listBlockStartIndex = i + 1;
+            break;
+        }
+
+        // If we reach the top of the file, the entire block starts at index 0
+        if (i === 0) {
+            listBlockStartIndex = 0;
+        }
+    }
+
+    // 2. Look for the parent on the line immediately preceding the block
+    const parentLineIndex = listBlockStartIndex - 1;
+    if (parentLineIndex >= 0) {
+        const parentLine = lines[parentLineIndex];
+        const parentIndent = (parentLine.match(/^[\t ]*/) || [''])[0];
+        const parentIndentLevel = Math.floor(parentIndent.split('').reduce((total, char) => total + (char === '\t' ? 4 : 1), 0) / 4);
+        const parentMatch = parentLine.trim().match(/^(\d+)\.\s*/);
+
+        if (parentIndentLevel === currentLevel - 1 && parentMatch) {
+            // Found a valid parent, create a stable ID
+            return `${parentMatch[1]}_${parentLineIndex}`;
+        }
+    }
+
+    // 3. If no parent is found, it's an "orphan" list.
+    // Its ID is based on its own starting position to keep it stable.
+    return `noparent_${currentLevel}_${listBlockStartIndex}`;
+};
+
+const handleEnter = (event) => {
+
+    const textarea = event.target;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const value = formData.value.content;
+
+    // Check if we're in a list item
+    const currentLine = value.substring(value.lastIndexOf('\n', start - 1) + 1, start);
+    const isInListItem = currentLine.match(/^\s*(\d+\.|[-*+])\s/);
+
+    if (isInListItem) {
+        // Find the next line
+        //start searching for \n from start point to find next line
+        const nextLineStart = value.indexOf('\n', start) + 1;
+
+        if (nextLineStart === 0) {
+            // No next line, create a new list item
+            event.preventDefault();
+            const beforeText = value.substring(0, start);
+            const afterText = value.substring(end);
+
+            // Extract current list marker info
+            const listMatch = currentLine.match(/^(\s*)(\d+\.|[-*+])(\s+)/);
+            if (!listMatch) return;
+
+            const [_, indent, marker, space] = listMatch;
+            let newMarker;
+
+            if (marker.match(/\d+\./)) {
+                // For ordered lists, increment the number
+                const currentNumber = parseInt(marker, 10);
+                newMarker = `${currentNumber + 1}.`;
+            } else {
+                // For unordered lists, keep the same marker
+                newMarker = marker;
+            }
+
+            // Create new list item with same indentation
+            const newListItem = `\n${indent}${newMarker}${space}`;
+            formData.value.content = beforeText + newListItem + afterText;
+
+            // Position cursor after the new list marker
+            const newCursorPos = start + newListItem.length;
+            nextTick(() => {
+                textarea.focus();
+                textarea.setSelectionRange(newCursorPos, newCursorPos);
+            });
+            return;
+        }
+
+
+        // Check if there is a next line and it's a list item
+        if (nextLineStart > 0) {
+            const nextLineEnd = value.indexOf('\n', nextLineStart);
+            const nextLine = nextLineEnd === -1 ?
+                value.substring(nextLineStart) :
+                value.substring(nextLineStart, nextLineEnd);
+
+            const nextListItemMatch = nextLine.match(/^\s*(\d+\.|[-*+])\s/);
+
+            if (nextListItemMatch) {
+                // Just move the cursor to after the list marker
+                event.preventDefault();
+                const newPosition = nextLineStart + nextListItemMatch[0].length;
+
+                nextTick(() => {
+                    textarea.focus();
+                    textarea.setSelectionRange(newPosition, newPosition);
+                });
+                return;
+            }
+        }
+    }
+
+    // Default enter behavior
+    event.preventDefault();
+    const beforeText = value.substring(0, start);
+    const afterText = value.substring(end);
+    formData.value.content = beforeText + '\n' + afterText;
+    const newCursorPos = start + 1;
+    nextTick(() => {
+        textarea.focus();
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+    });
+};
+
+const handleFormat = ({ prefix, suffix }) => {
+    const textarea = contentTextarea.value;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = formData.value.content.substring(start, end);
+    const beforeText = formData.value.content.substring(0, start);
+    const afterText = formData.value.content.substring(end);
+
+    const isLineStart = start === 0 || formData.value.content.charAt(start - 1) === '\n';
+    // Match list markers at start of line:
+    // - \s* : any number of spaces at start
+    // - (?:\d+\.\s*|[-*+]\s*) : either a number followed by dot, or a bullet (-/*/+)
+    // - $ : ensure nothing else follows (empty line after marker)
+    // Check if we need a newline for list items
+    // Check if prefix is a list marker (ordered or unordered)
+    // - Optional whitespace, followed by either:
+    //   - A number and a dot (1.)
+    //   - A bullet point (-, *, +)
+    // - Optional trailing whitespace
+    const isListMarker = /^\s*(?:\d+\.|[-*+])(?:\s|$)/.test(prefix);
+    const needsNewLine = isListMarker && !isLineStart;
+
+    let newCursorPos = start;
+    let insertion;
+    let { number, indent } = { number: null, indent: '' };
+    if (prefix.match(/^\s*\d+\.\s+$/)) {
+        ({ number, indent } = getOrderListCounter(beforeText));
+    } else if (prefix.match(/^\s*[-*+]\s+$/)) {
+  
+        // For unordered lists, maintain current indentation
+        const lastLineEnd = beforeText.lastIndexOf('\n');
+        const currentLine = beforeText.substring(lastLineEnd + 1);
+        indent = currentLinesIndention(currentLine);
+    }
+    /**
+     * Determines if we're starting a new sublist by checking if the current line is empty.
+     * This is true in two cases:
+     * 1. There are no newlines in beforeText (lastIndexOf returns -1)
+     * 2. The text after the last newline is empty or only whitespace
+     * 
+     * This helps prevent double-indentation when creating the first item in a sublist.
+     * @type {boolean}
+     */
+    // Check if we're starting a new sublist by looking at the previous line
+    const prevLineEnd = beforeText.lastIndexOf('\n', beforeText.lastIndexOf('\n') - 1);
+    const prevLine = beforeText.substring(prevLineEnd + 1, beforeText.lastIndexOf('\n')).trim();
+    
+    // It's a new sublist if:
+    // 1. Previous line has content (not empty)
+    // 2. Current line is empty
+    // 3. Previous line is a list item
+    const isNewSublist = prevLine.match(/^\s*[-*+]\s+\S+/) && 
+        beforeText.substring(beforeText.lastIndexOf('\n') + 1).trim() === '';
+
+    if (number) {
+        // Only add indentation if it's not a new sublist (indent is already in the prefix)
+        insertion = (isNewSublist ? '' : indent) + number + '. ' + selectedText + suffix;
+    } else if (prefix.match(/^\s*[-*+]\s+$/)) {
+        console.log('isNewSubList, indent', isNewSublist, indent.length);
+        // For unordered lists, only add indentation if it's not a new sublist
+        insertion = indent + prefix + selectedText + suffix;
+    } else {
+        insertion = prefix + selectedText + suffix;
+    }
+
+    // Handle list items formatting
+    if (isListMarker) {
+        const lastLineEnd = beforeText.lastIndexOf('\n');
+        const lastLine = beforeText.substring(lastLineEnd + 1);
+        const isPreviousLineEmpty = lastLine.trim() === '';
+
+        // For unordered lists
+        if (prefix.match(/^\s*[-*+]\s*$/)) {
+            // Get current line's indentation
+            const lastLineEnd = beforeText.lastIndexOf('\n');
+            const currentLine = beforeText.substring(lastLineEnd + 1);
+            const currentIndent = currentLinesIndention(currentLine);
+
+            // Clean up any extra spaces and maintain current indentation
+            insertion = insertion.replace(/^(\s*[-*+])\s*/, (match, bullet) => {
+                // Use exactly 4 spaces for sublists, no indentation for top level
+                return (isNewSublist ? '    ' : currentIndent || '') + '-' + ' ';
+            });
+
+            // Add newline if needed, maintaining current indentation
+            if (needsNewLine && !isPreviousLineEmpty) {
+                insertion = '\n' + insertion;
+            }
+        } else if (number) {
+            // For ordered lists, just handle newlines if needed
+            if (needsNewLine && !isPreviousLineEmpty) {
+                insertion = '\n' + insertion;
+            }
+        }
+    }
+
+    // Special handling for different markdown elements
+    if ((prefix === '[' && suffix === '](url)') || (prefix === '![' && suffix === '](image-url)')) {
+        // Position cursor inside the link/image URL
+        newCursorPos += prefix.length;
+    } else if (prefix === '```\n' && suffix === '\n```') {
+        // Position cursor inside the code block
+        newCursorPos += prefix.length;
+    } else if (number) {
+        // Calculate cursor position based on whether it's a new sublist or not
+        const indentLength = isNewSublist ? 0 : indent.length;
+        const numberLength = number.toString().length;
+        newCursorPos += indentLength + numberLength + 2 + selectedText.length; // +2 for '. '
+    } else if (prefix.match(/^\s*[-*+]\s+$/)) {
+        // For unordered lists, account for indentation and list marker
+        newCursorPos += indent.length + prefix.trim().length + 1 + selectedText.length; // +1 for the space after marker
+    } else {
+        // Default: position after the inserted prefix
+        newCursorPos += prefix.length + selectedText.length;
+    }
+
+    formData.value.content = beforeText + insertion + afterText;
+
+    // Set cursor position after the inserted text
+    nextTick(() => {
+        textarea.focus();
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+    });
+};
+const navigateToManagePosts = () => {
+    router.push('/admin/manage-posts');
+};
 const cancelEdit = () => {
-  // Navigate back to admin page or blog page
-  router.push('/admin/manage-posts');
+    const { title, content, featureImage, date, readingTime } = formData.value;
+    const defaultDate = new Date().toISOString().split('T')[0];
+
+    // Check if any field has been modified from its default/empty state
+    const hasChanges = title ||
+        content ||
+        featureImage ||
+        date !== defaultDate ||
+        readingTime !== 5;
+
+    if (!hasChanges) {
+        navigateToManagePosts();
+    } else {
+        confirmDialog.value?.show();
+    }
+};
+
+const validateForm = () => {
+    let isValid = true;
+    formErrors.value = {}; // Reset errors
+
+    // Title validation
+    if (!formData.value.title?.trim()) {
+        formErrors.value.title = 'Title is required';
+        isValid = false;
+    }
+
+    // Date validation
+    if (!formData.value.date) {
+        formErrors.value.date = 'Date is required';
+        isValid = false;
+    }
+
+    // Content validation
+    if (!formData.value.content?.trim()) {
+        formErrors.value.content = 'Content is required';
+        isValid = false;
+    }
+
+    return isValid;
 };
 
 const handleSubmit = async () => {
-  if (isSubmitting.value) return; // Prevent double submit
-  isSubmitting.value = true;
-  
-  // Validate form
-  if (!validateForm()) {
-    // Focus the first field with an error
-    const firstErrorField = Object.keys(formErrors.value).find(key => formErrors.value[key]);
-    if (firstErrorField) {
-      nextTick(() => {
-        document.getElementById(firstErrorField)?.focus();
-      });
+    if (isSubmitting.value) return; // Prevent double submit
+    isSubmitting.value = true;
+
+    // Validate form
+    if (!validateForm()) {
+        // Focus the first field with an error
+        const firstErrorField = Object.keys(formErrors.value).find(key => formErrors.value[key]);
+        if (firstErrorField) {
+            nextTick(() => {
+                document.getElementById(firstErrorField)?.focus();
+            });
+        }
+        isSubmitting.value = false;
+        return;
     }
-    isSubmitting.value = false;
-    return;
-  }
-  
-  try {
-    const postData = {
-      ...formData.value,
-      date: new Date(formData.value.date)
-    };
-    
-    if (isEditMode.value && postId.value) {
-      // Update existing post
-      await updatePost(postId.value, postData);
-      showNotify('Post updated successfully!', 'success');
-    } else {
-      // Add new post
-      postData.createdAt = new Date();
-      await addPost(postData);
-      showNotify('Post published successfully!', 'success');
+
+    try {
+        const postData = {
+            ...formData.value,
+            date: new Date(formData.value.date)
+        };
+
+        if (isEditMode.value && postId.value) {
+            // Update existing post
+            await updatePost(postId.value, postData);
+            showNotify('Post updated successfully!', 'success');
+        } else {
+            // Add new post
+            postData.createdAt = new Date();
+            await addPost(postData);
+            showNotify('Post published successfully!', 'success');
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await router.push('/blog');
+
+        // Reset form after successful submission if it was a new post
+        if (!isEditMode.value) {
+            formData.value = {
+                title: '',
+                date: new Date().toISOString().split('T')[0],
+                readingTime: 5,
+                featureImage: '',
+                content: ''
+            };
+        }
+    } catch (error) {
+        console.error(`Error ${isEditMode.value ? 'updating' : 'publishing'} post:`, error);
+        showNotify(`Failed to ${isEditMode.value ? 'update' : 'publish'} post. ${error.message || 'Please try again.'}`, 'error');
+    } finally {
+        isSubmitting.value = false;
     }
-    
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await router.push('/blog');
-    
-    // Reset form after successful submission if it was a new post
-    if (!isEditMode.value) {
-      formData.value = {
-        title: '',
-        date: new Date().toISOString().split('T')[0],
-        readingTime: 5,
-        featureImage: '',
-        content: ''
-      };
-    }
-  } catch (error) {
-    console.error(`Error ${isEditMode.value ? 'updating' : 'publishing'} post:`, error);
-    showNotify(`Failed to ${isEditMode.value ? 'update' : 'publish'} post. ${error.message || 'Please try again.'}`, 'error');
-  } finally {
-    isSubmitting.value = false;
-  }
 }
 </script>
 
 <style scoped>
-.admin-form {
-  position: relative;
-  top: 10rem;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* 
+  :deep() is a Vue scoped CSS feature that allows styling child components or dynamic content.
+  The selector inside :deep() will be left untouched, allowing it to target nested elements.
+  In this case, we're styling ordered lists within elements that have the 'prose' class.
+*/
+
+:deep(.prose ul) {
+    list-style-type: disc;
+    /* Default bullet points for unordered lists */
+    padding-left: 1.5rem;
 }
 
-@media (max-width: 768px) {
-  .admin-form {
-    top: 9rem; /* Reduced top margin to match compact header */
-    padding: 1rem; /* Standard padding */
-    margin: 0 0.75rem; /* Slightly reduced side margins */
+:deep(.prose ol) {
+    list-style-type: decimal;
+    /* Numbers for ordered lists */
+    padding-left: 1.5rem;
+}
+
+:deep(.prose blockquote) {
+    border-left: 4px solid #e5e7eb;
+    /* Light gray border on the left */
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    color: #4b5563;
+    /* Slightly darker text */
+    font-style: italic;
+}
+
+.admin-form {
+    max-width: 800px;
+    margin: 12rem auto -7rem;
+    background-color: white;
     border-radius: 8px;
-  }
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    position: relative;
 }
 
 h1 {
-  font-size: clamp(1.5rem, 5vw, 1.8rem);
-  color: #4c1d95; /* Match the purple brand color */
-  margin-bottom: clamp(1rem, 4vw, 1.5rem);
-  text-align: center;
-  font-weight: 700;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #4c1d95;
+    font-size: clamp(1.5rem, 5vw, 1.8rem);
+    color: #4c1d95;
+    /* Match the purple brand color */
+    margin-bottom: clamp(1rem, 4vw, 1.5rem);
+    text-align: center;
+    font-weight: 700;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #4c1d95;
 }
 
 
 .change-password-btn {
-  background-color: #4299e1;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  text-decoration: none;
-  transition: all 0.2s;
+    background-color: #4299e1;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.2s;
 }
 
 .change-password-btn:hover {
-  background-color: #3182ce;
+    background-color: #3182ce;
 }
 
 
 
 form {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(1rem, 3vw, 1.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1rem, 3vw, 1.5rem);
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 label {
-  font-weight: 600;
-  color: #4a5568;
-  font-size: clamp(0.9rem, 2vw, 1rem);
+    font-weight: 600;
+    color: #4a5568;
+    font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
 input,
 textarea {
-  width: 100%;
-  padding: clamp(0.6rem, 2vw, 0.8rem);
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: clamp(0.9rem, 2vw, 1rem);
-  transition: border-color 0.2s;
+    width: 100%;
+    padding: clamp(0.6rem, 2vw, 0.8rem);
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    transition: border-color 0.2s;
+    /* preserve whitespace */
+    white-space: pre;
+    tab-size: 4;
 }
 
 input:focus-visible,
 textarea:focus-visible {
-  outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
 }
 
 input[aria-invalid="true"],
 textarea[aria-invalid="true"] {
-  border-color: #e53e3e;
-  background-color: #fff5f5;
+    border-color: #e53e3e;
+    background-color: #fff5f5;
 }
 
 textarea {
-  min-height: 200px;
-  resize: vertical;
+    min-height: 200px;
+    resize: vertical;
 }
 
 .button-group {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    /* padding: 0 1rem;
+  margin-bottom: 4.5rem; Balanced spacing to prevent GoBackTop overlap */
+
 }
 
+@media (min-width: 375px) {
+    .button-group {
+        flex-direction: row;
+        place-items: center;
+        padding: 1.5rem 0;
+    }
+}
+
+
+
 .submit-btn {
-  padding: clamp(0.8rem, 3vw, 1rem);
-  background-color: #4c1d95; /* Match the brand purple */
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: clamp(1rem, 2.5vw, 1.125rem);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 0.5rem;
+    padding: 0.8rem 1.5rem;
+
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4c1d95;
+    /* Match the brand purple */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease-in-out,
+        transform 0.1s ease-out,
+        box-shadow 0.15s ease-in-out;
+    margin-top: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
-  .submit-btn {
-    margin-top: 1rem;
-    padding: 1rem;
-  }
+    .submit-btn {
+        margin-top: 1rem;
+        padding: 1rem;
+    }
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #6b4fa8;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-color: #5b21b6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .submit-btn:focus-visible {
-  outline: 3px solid #ffffff;
-  outline-offset: 0.5rem;
-  box-shadow: 0 0 0 5px rgba(76, 29, 149, 0.7);
-  position: relative;
-  z-index: 1;
+    outline: 3px solid #ffffff;
+    outline-offset: 0.5rem;
+    box-shadow: 0 0 0 5px rgba(76, 29, 149, 0.7);
+    position: relative;
+    z-index: 1;
 }
 
 .submit-btn:disabled {
-  background-color: #a0aec0;
-  cursor: not-allowed;
-  opacity: 0.7;
+    background-color: #a0aec0;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 .cancel-btn {
-  padding: clamp(0.8rem, 3vw, 1rem);
-  background-color: #e2e8f0;
-  color: #4a5568;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: all 0.2s;
+    padding: 0.8rem 1.5rem;
+
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e2e8f0;
+    color: #4a5568;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition:
+        background-color 0.2s ease,
+        transform 0.1s ease-out;
+    margin-top: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    cursor: pointer;
 }
 
 .cancel-btn:hover {
-  background-color: #cbd5e0;
-  cursor: pointer;
+    background-color: #cbd5e0;
+    cursor: pointer;
 }
 
 .markdown-editor {
-  display: grid;
-  gap: 1rem;
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Tab Navigation */
+.markdown-tabs {
+    display: flex;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 1rem;
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    font-weight: 600;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tab-button:hover {
+    color: #4c1d95;
+    background-color: rgba(76, 29, 149, 0.05);
+}
+
+.tab-button.active {
+    color: #4c1d95;
+    border-bottom-color: #4c1d95;
+}
+
+.tab-button .icon {
+    font-size: 1.1rem;
+}
+
+/* Markdown Toolbar */
+.markdown-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px 6px 0 0;
+    margin-bottom: -1px;
+}
+
+.toolbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.6rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    color: #4a5568;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.toolbar-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e0;
+    color: #4c1d95;
+}
+
+.toolbar-btn:active {
+    background: #edf2f7;
+    transform: translateY(1px);
+}
+
+.toolbar-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: #e2e8f0;
+    margin: 0 0.25rem;
+}
+
+/* Editor and Preview Panels */
+#editor-panel,
+#preview-panel {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+}
+
+#preview-panel {
+    padding: 1rem;
+}
+
+.preview-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+#content {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 0 0 6px 6px;
+    padding: 1rem;
+    min-height: 300px;
+    font-family: 'Fira Code', monospace;
+    line-height: 1.6;
+    resize: vertical;
 }
 
 @media (min-width: 768px) {
-  .markdown-editor {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "editor preview"
-      "hint hint"
-      "error error";
-  }
+    .markdown-editor {
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 767px) {
-  .markdown-editor {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "editor"
-      "hint"
-      "error"
-      "preview";
-  }
+    .markdown-editor {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .markdown-toolbar {
+        overflow-x: auto;
+        padding-bottom: 0.75rem;
+    }
 }
 
 .preview-content {
-  height: 300px;
-  overflow-y: auto;
-  padding: 0.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
+    height: 300px;
+    overflow-y: auto;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
 }
 
 .preview-content:focus {
-  outline: 2px solid #7c5fbf;
-  outline-offset: 2px;
+    outline: 2px solid #7c5fbf;
+    outline-offset: 2px;
 }
 
 .error-message {
-  color: #e53e3e;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  font-weight: 500;
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
 }
 
 .hint {
-  color: #2d3748;
-  font-size: 0.95rem;
-  margin-top: 0.25rem;
-  font-weight: 500;
+    color: #2d3748;
+    font-size: 0.95rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
 }
 
 .preview-container {
-  background: white;
-  border-radius: 6px;
-  padding: clamp(0.75rem, 2vw, 1rem);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  margin-top: 1rem;
+    background: white;
+    border-radius: 6px;
+    padding: clamp(0.75rem, 2vw, 1rem);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-top: 1rem;
 }
 
 @media (max-width: 768px) {
-  .preview-container {
-    margin-top: 1.5rem;
-  }
+    .preview-container {
+        margin-top: 1.5rem;
+    }
 }
 
 .preview-container h2 {
-  margin: 0 0 1rem 0;
-  color: #4a5568;
-  font-size: 1rem;
+    margin: 0 0 1rem 0;
+    color: #4a5568;
+    font-size: 1rem;
 }
 
 .preview-content {
-  padding: 1rem;
-  background: white;
-  border-radius: 6px;
-  line-height: 1.6;
-  color: #2d3748;
+    padding: 1rem;
+    background: white;
+    border-radius: 6px;
+    line-height: 1.6;
+    color: #2d3748;
 }
 
 .preview-content code {
-  background: #f7fafc;
-  padding: 0.2rem 0.4rem;
-  border-radius: 3px;
-  font-family: 'Fira Code', monospace;
+    background: #f7fafc;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Fira Code', monospace;
 }
 
 .preview-content pre {
-  background: #f7fafc;
-  padding: 1rem;
-  border-radius: 6px;
-  overflow-x: auto;
+    background: #f7fafc;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
 }
 
 .preview-content pre code {
-  padding: 0;
-  border: none;
-  background: none;
+    padding: 0;
+    border: none;
+    background: none;
 }
 
-@media (max-width: 640px) {
-  .admin-form {
-    margin: 1rem;
-    padding: 1rem;
-  }
-
-  h1 {
-    font-size: 1.5rem;
-  }
-}
 
 @media (max-width: 768px) {
-  .markdown-editor {
-    grid-template-columns: 1fr;
-  }
+    .markdown-editor {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
